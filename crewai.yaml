@@ -13,12 +13,11 @@ entry_point: crewai_cloud_lucy.py
 
 # Dependencies
 requirements:
-  - crewai
-  - langchain-openai
-  - langchain-anthropic
-  - langchain-google-genai
-  - langfuse
-  - python-dotenv
+  - crewai>=0.50.0
+  - langchain-openai>=0.1.0
+  - langchain-anthropic>=0.1.0
+  - langchain-google-genai>=0.1.0
+  - python-dotenv>=1.0.0
 
 # Agents configuration
 agents:
