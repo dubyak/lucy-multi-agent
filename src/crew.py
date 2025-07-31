@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Lucy Multi-Agent for CrewAI Cloud Deployment
-Simplified version for CrewAI Cloud compatibility
+Lucy Multi-Agent Crew for CrewAI Cloud
+Main entry point for CrewAI Cloud deployment
 """
 
 import os
