@@ -7,15 +7,23 @@ def run_lucy_crew(user_input):
     try:
         # Try to import and run the full crew
         from .crew import create_lucy_crew
-        crew = create_lucy_crew()
+        crew = create_lucy_crew(customer_message=user_input)
         if crew is None:
             return "Error: Could not create Lucy crew"
         
-        result = crew.kickoff(inputs={"customer_message": user_input})
+        # Execute the crew with the user input
+        result = crew.kickoff()
         return result
     except ImportError as e:
         # Fallback for testing without full dependencies
-        return f"Lucy Crew Test Mode: Received input: '{user_input}'. Full crew would process this with PhotoVerifier, BusinessCoach, and Underwriter agents. (Import error: {e})"
+        return f"""Lucy Crew Test Mode: Received input: '{user_input}'. 
+
+Full crew would process this through:
+1. **PhotoVerifier** - Analyze business photos for verification
+2. **BusinessCoach** - Help set business goals and loan purposes  
+3. **Underwriter** - Assess risk and generate loan offer
+
+(Import error: {e})"""
     except Exception as e:
         return f"Error running Lucy crew: {str(e)}"
 
