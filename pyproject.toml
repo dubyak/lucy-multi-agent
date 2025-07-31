@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Lucy - AI Loan Officer & Business Partner with multi-agent workflow"
 authors = [{name = "William Kendall"}]
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10,<3.14"
 dependencies = [
     "crewai>=0.50.0",
     "langchain-openai>=0.1.0",
