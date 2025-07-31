@@ -2,17 +2,20 @@
 Main entry point for Lucy Multi-Agent Crew
 """
 
-from .crew import create_lucy_crew
-
 def run_lucy_crew(user_input):
     """Run Lucy's crew with the given input"""
-    crew = create_lucy_crew()
-    if crew is None:
-        return "Error: Could not create Lucy crew"
-    
     try:
+        # Try to import and run the full crew
+        from .crew import create_lucy_crew
+        crew = create_lucy_crew()
+        if crew is None:
+            return "Error: Could not create Lucy crew"
+        
         result = crew.kickoff(inputs={"customer_message": user_input})
         return result
+    except ImportError as e:
+        # Fallback for testing without full dependencies
+        return f"Lucy Crew Test Mode: Received input: '{user_input}'. Full crew would process this with PhotoVerifier, BusinessCoach, and Underwriter agents. (Import error: {e})"
     except Exception as e:
         return f"Error running Lucy crew: {str(e)}"
 
