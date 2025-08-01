@@ -6,7 +6,7 @@ def run_lucy_crew(user_input):
     """Run Lucy's crew with the given input"""
     try:
         # Try to import and run the full crew
-        from .crew import create_lucy_crew
+        from src.config.crew import create_lucy_crew
         crew = create_lucy_crew(customer_message=user_input)
         if crew is None:
             return "Error: Could not create Lucy crew"
@@ -32,4 +32,4 @@ if __name__ == "__main__":
     test_input = "Hi, I need a loan for my small shop in Nairobi"
     result = run_lucy_crew(test_input)
     print("Lucy's Response:")
-    print(result) 
+    print(result)

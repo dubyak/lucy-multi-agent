@@ -15,23 +15,45 @@ def get_llm():
     
     try:
         if provider == "anthropic":
-            from langchain_anthropic import ChatAnthropic
-            api_key = os.getenv("ANTHROPIC_API_KEY")
-            if not api_key:
-                raise ValueError("ANTHROPIC_API_KEY not found in environment")
-            return ChatAnthropic(
-                model="claude-3-5-sonnet-20241022",
-                api_key=api_key
-            )
+            try:
+                from langchain_anthropic import ChatAnthropic
+                api_key = os.getenv("ANTHROPIC_API_KEY")
+                if not api_key:
+                    raise ValueError("ANTHROPIC_API_KEY not found in environment")
+                return ChatAnthropic(
+                    model="claude-3-5-sonnet-20241022",
+                    api_key=api_key
+                )
+            except ImportError:
+                print("Warning: langchain-anthropic not available, falling back to OpenAI")
+                from langchain_openai import ChatOpenAI
+                api_key = os.getenv("OPENAI_API_KEY")
+                if not api_key:
+                    raise ValueError("OPENAI_API_KEY not found in environment")
+                return ChatOpenAI(
+                    model="gpt-4o-mini",
+                    api_key=api_key
+                )
         elif provider == "gemini":
-            from langchain_google_genai import ChatGoogleGenerativeAI
-            api_key = os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                raise ValueError("GOOGLE_API_KEY not found in environment")
-            return ChatGoogleGenerativeAI(
-                model="gemini-1.5-flash",
-                google_api_key=api_key
-            )
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                api_key = os.getenv("GOOGLE_API_KEY")
+                if not api_key:
+                    raise ValueError("GOOGLE_API_KEY not found in environment")
+                return ChatGoogleGenerativeAI(
+                    model="gemini-1.5-flash",
+                    google_api_key=api_key
+                )
+            except ImportError:
+                print("Warning: langchain-google-genai not available, falling back to OpenAI")
+                from langchain_openai import ChatOpenAI
+                api_key = os.getenv("OPENAI_API_KEY")
+                if not api_key:
+                    raise ValueError("OPENAI_API_KEY not found in environment")
+                return ChatOpenAI(
+                    model="gpt-4o-mini",
+                    api_key=api_key
+                )
         else:  # default to OpenAI
             from langchain_openai import ChatOpenAI
             api_key = os.getenv("OPENAI_API_KEY")
@@ -155,4 +177,4 @@ def create_lucy_crew(customer_message=""):
         langfuse=langfuse
     )
     
-    return crew 
+    return crew
