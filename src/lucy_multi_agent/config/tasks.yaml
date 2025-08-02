@@ -1,29 +1,88 @@
-verify_photos_task:
+task_b1_photo_analysis:
   description: >
-    Analyze any business photos provided by the customer. Look for signs of business legitimacy, operational status,
-    physical condition of premises, and any potential risk factors. Provide detailed observations about what the
-    photos reveal about the business.
+    CRITICAL TASK B1: Analyze {customer_photos} for authenticity and business assessment.
+    Requirements: (1) Check for authenticity - flag watermarks, stock images, screenshots
+    (2) Detect duplicates - flag if same image resubmitted  
+    (3) Assess stock density: low/medium/high with justification
+    (4) Determine floor area tier: small (<8m²), medium (8-20m²), large (>20m²)
+    (5) Evaluate product breadth and visible price bands
+    (6) Choose turnover tier (low/medium/high) and justify
+    (7) Generate Photo Income Note with conservative gross sales range and net estimate (40% COGS default)
+    Only mark complete when ≥2 authentic, non-duplicate photos analyzed AND specific location provided.
   expected_output: >
-    A detailed analysis of the business photos including verification status, observations about business operations,
-    physical condition assessment, and any risk factors identified from the visual evidence.
+    Photo Income Note containing: stock density assessment, floor area tier, turnover evaluation, 
+    conservative monthly gross sales range, net income estimate, and cross-check vs self-reported numbers.
+    Flag any authenticity or duplicate issues requiring new photos.
   agent: photo_verifier
 
-coach_business_task:
+task_e4a_vision_setting:
   description: >
-    Help the customer clarify their business goals and determine how they plan to use the loan funds. Ask probing
-    questions about their business needs, growth plans, and specific objectives. Ensure the loan purpose aligns
-    with sound business strategy.
+    TASK E4a: Facilitate long-term vision discovery using outside-in approach.
+    Start with identity questions: "What kind of business do you run? What do you love about it?"
+    Then ask: "When you think about the future, what would you love this business to become?"
+    Focus on 6-12 month aspirations. Avoid money questions until ambition is established.
+    Use warm, engaging tone with emojis. Ask ONE question at a time.
   expected_output: >
-    A summary of the customer's business goals, recommended loan purpose, implementation timeline, and how the
-    loan will contribute to business growth and success.
+    Clear long-term business vision (≥6 months) that reflects customer's authentic aspirations.
+    Include motivational elements and specific outcomes they want to achieve.
   agent: business_coach
 
-underwrite_loan_task:
+task_e4b_goal_structuring:
   description: >
-    Based on the photo analysis and business coaching insights, assess the overall loan application risk and
-    generate an appropriate loan offer. Consider business viability, risk factors, loan purpose alignment,
-    and the customer's ability to successfully use the funds.
+    TASK E4b: Convert long-term vision into specific 1-3 month milestone.
+    Ask: "To move toward that dream, what's one win for the next 1-3 months?"
+    Offer examples: "Serve 40 customers/day", "Add a fridge", "Launch chips business"
+    Ensure goal is specific, measurable, and time-bound before marking complete.
   expected_output: >
-    A comprehensive loan offer including loan amount, interest rate, repayment terms, conditions, and detailed
-    risk assessment explaining the reasoning behind the offer terms.
+    Specific, measurable, time-bound goal for 1-3 months that ladders up to the long-term vision.
+    Include success metrics and target timeline.
+  agent: business_coach
+
+task_e6_collaborative_sprint:
+  description: >
+    CRITICAL TASK E6: Run 5-10 turn collaborative sprint to create tangible business asset.
+    Process: (1) Ask "What's the biggest blocker/opportunity?" 
+    (2) Ask ≥2 clarifying questions about context/constraints
+    (3) Provide insight with quick calc or benchmark
+    (4) Create ONE tangible asset: WhatsApp promo, expense tracker, layout sketch, price comparison
+    (5) Design 1-3 day micro-test using the asset
+    (6) Get commitment to test. Must deliver asset before marking complete.
+  expected_output: >
+    Completed collaborative sprint with: identified challenge, contextual insight, 
+    created tangible asset (promo/tracker/template), designed micro-test, and customer commitment.
+    Asset must be produced in chat before task completion.
+  agent: business_coach
+
+task_b4_sales_triangulation:
+  description: >
+    CRITICAL TASK B4: Gather sales data for underwriting using outside-in approach.
+    Ask: "Yesterday roughly how many customers? About how much did you sell?"
+    Accept ranges/estimates. Provide quick margin calculation in return.
+    Also gather: weekly sales average, top 3 expenses if possible.
+    Only mark complete when BOTH yesterday's sales AND customer count captured.
+  expected_output: >
+    Yesterday's sales amount, customer count, quick margin analysis, 
+    and ideally weekly sales pattern and major expense categories.
+  agent: underwriter
+
+task_l3_loan_structuring:
+  description: >
+    TASK L3: Structure loan uses to support the established 1-3 month goal.
+    Ask: "How would a loan help hit that goal? Top 1-3 uses?"
+    Ensure uses are concrete and costs align with goal. Provide ROI/breakeven calc.
+    Cross-reference with Photo Income Note cap from B1.
+  expected_output: >
+    Maximum 3 specific loan uses tied to the goal, with cost estimates and 
+    ROI analysis showing how loan supports the milestone achievement.
+  agent: underwriter
+
+task_l5_readiness_confirmation:
+  description: >
+    TASK L5: Confirm customer readiness for loan offer.
+    Only ask after ALL critical tasks complete (B1, B4, E4b, E6, L3) AND tangible asset delivered.
+    Ask: "Ready to proceed so I can tailor your offer?" 
+    Accept explicit readiness signals: "ready", "yes", "tuende"
+  expected_output: >
+    Explicit customer confirmation of readiness to proceed with loan offer.
+    Confirm all critical path tasks completed before marking done.
   agent: underwriter
