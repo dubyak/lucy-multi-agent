@@ -5,15 +5,7 @@ Main entry point for Lucy Multi-Agent Crew
 def main(user_input=""):
     """Main function for CrewAI Cloud deployment"""
     try:
-        import os
-        import sys
-        
-        # Add the src directory to path for imports
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        src_dir = os.path.dirname(current_dir)
-        sys.path.insert(0, src_dir)
-        
-        from config.crew import create_lucy_crew
+        from .crew import create_lucy_crew
         result = create_lucy_crew(customer_message=user_input)
         return result
     except Exception as e:
