@@ -38,11 +38,9 @@ def test_structure():
         "src/config/main.py", 
         "src/config/crew.py",
         "src/config/config.py",
-        "src/config/config/__init__.py",
-        "src/config/config/crew_config.py",
         "crewai.yaml",
         "pyproject.toml",
-        "poetry.lock"
+        "requirements.txt"
     ]
     
     missing_files = []
