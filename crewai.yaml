@@ -16,5 +16,5 @@ env:
 
 # Dependencies
 requirements:
-  - crewai==0.5.0
-  - python-dotenv==1.1.1
+  - crewai
+  - python-dotenv
