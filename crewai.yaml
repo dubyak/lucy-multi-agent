@@ -2,7 +2,7 @@ name: lucy-multi-agent
 description: Lucy - AI Loan Officer & Business Partner with multi-agent workflow
 
 # Entry point
-entry_point: src/config/main.py
+entry_point: src.config.main:main
 
 # Environment variables
 env:

@@ -2,19 +2,30 @@
 Main entry point for Lucy Multi-Agent Crew
 """
 
-def run_lucy_crew(user_input):
-    """Run Lucy's crew with the given input"""
+def main(user_input=""):
+    """Main function for CrewAI Cloud deployment"""
     try:
-        # Import from the expected location
-        from src.config.config.crew import create_lucy_crew
+        import os
+        import sys
+        
+        # Add the src directory to path for imports
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        src_dir = os.path.dirname(current_dir)
+        sys.path.insert(0, src_dir)
+        
+        from config.crew import create_lucy_crew
         result = create_lucy_crew(customer_message=user_input)
         return result
     except Exception as e:
         return f"Error running Lucy crew: {str(e)}"
 
+def run_lucy_crew(user_input):
+    """Run Lucy's crew with the given input"""
+    return main(user_input)
+
 if __name__ == "__main__":
     # Test the crew
     test_input = "Hi, I need a loan for my small shop in Nairobi"
-    result = run_lucy_crew(test_input)
+    result = main(test_input)
     print("Lucy's Response:")
     print(result)
