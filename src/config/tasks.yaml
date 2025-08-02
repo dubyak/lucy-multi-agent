@@ -1,0 +1,29 @@
+verify_photos_task:
+  description: >
+    Analyze any business photos provided by the customer. Look for signs of business legitimacy, operational status,
+    physical condition of premises, and any potential risk factors. Provide detailed observations about what the
+    photos reveal about the business.
+  expected_output: >
+    A detailed analysis of the business photos including verification status, observations about business operations,
+    physical condition assessment, and any risk factors identified from the visual evidence.
+  agent: photo_verifier
+
+coach_business_task:
+  description: >
+    Help the customer clarify their business goals and determine how they plan to use the loan funds. Ask probing
+    questions about their business needs, growth plans, and specific objectives. Ensure the loan purpose aligns
+    with sound business strategy.
+  expected_output: >
+    A summary of the customer's business goals, recommended loan purpose, implementation timeline, and how the
+    loan will contribute to business growth and success.
+  agent: business_coach
+
+underwrite_loan_task:
+  description: >
+    Based on the photo analysis and business coaching insights, assess the overall loan application risk and
+    generate an appropriate loan offer. Consider business viability, risk factors, loan purpose alignment,
+    and the customer's ability to successfully use the funds.
+  expected_output: >
+    A comprehensive loan offer including loan amount, interest rate, repayment terms, conditions, and detailed
+    risk assessment explaining the reasoning behind the offer terms.
+  agent: underwriter
