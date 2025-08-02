@@ -7,42 +7,46 @@ from typing import Dict, Any, Optional
 
 def create_lucy_crew(customer_message: str = "", customer_photos: list = None, location: str = "") -> str:
     """
-    Lucy 2.0 Multi-Agent Workflow Demonstration
-    
-    This demonstrates how the single-agent Lucy system benefits from multi-agent specialization:
-    
-    SINGLE AGENT LIMITATIONS:
-    - One model handling photo analysis, coaching, AND underwriting
-    - Context switching between different skill domains
-    - Inconsistent quality across different task types
-    - Difficult to optimize for specific capabilities
-    
-    MULTI-AGENT BENEFITS:
-    1. **Specialized Expertise**: Each agent focuses on their domain
-    2. **Parallel Processing**: Photo analysis while conducting interviews  
-    3. **Consistent Quality**: Dedicated agents ensure uniform standards
-    4. **Modular Updates**: Improve individual capabilities independently
-    5. **Traceability**: Track each agent's decision-making process
+    Lucy 2.0 Multi-Agent Workflow - CrewAI Cloud Compatible
     """
     
-    # Simulate multi-agent workflow demonstration
+    # Try to use actual CrewAI first, fallback to demonstration
     try:
-        # In a full implementation, this would use actual CrewAI agents
-        # For deployment stability, we're demonstrating the concept
+        # Check if we can import CrewAI properly
+        from crewai import Crew
+        import os
         
-        workflow_demo = simulate_multi_agent_workflow(
-            customer_message=customer_message,
-            customer_photos=customer_photos or [],
-            location=location
+        # Check for required environment variables
+        if not os.getenv("OPENAI_API_KEY"):
+            raise ValueError("OPENAI_API_KEY not found")
+        
+        # Try to create actual CrewAI crew
+        crew = Crew(
+            agents_config='config/agents.yaml',
+            tasks_config='config/tasks.yaml',
+            verbose=True
         )
         
-        return workflow_demo
+        # Run the crew with inputs
+        inputs = {
+            'customer_message': customer_message,
+            'customer_photos': customer_photos or [],
+            'location': location
+        }
+        
+        result = crew.kickoff(inputs=inputs)
+        return f"🤖 **CrewAI Multi-Agent Result:**\n\n{str(result)}"
         
     except Exception as e:
-        # Fallback for deployment
-        return generate_fallback_response(customer_message, str(e))
+        # Fallback to demonstration mode
+        return simulate_multi_agent_workflow(
+            customer_message=customer_message,
+            customer_photos=customer_photos or [],
+            location=location,
+            error_info=str(e)
+        )
 
-def simulate_multi_agent_workflow(customer_message: str, customer_photos: list, location: str) -> str:
+def simulate_multi_agent_workflow(customer_message: str, customer_photos: list, location: str, error_info: str = "") -> str:
     """Simulate the multi-agent workflow benefits"""
     
     # Simulate agent specialization
@@ -78,6 +82,8 @@ def simulate_multi_agent_workflow(customer_message: str, customer_photos: list, 
 ✅ **Traceability**: Clear attribution of decisions to specific agents
 
 **Next Steps**: Configure API keys to activate full CrewAI functionality with Langfuse tracing.
+
+{f"**Debug Info**: {error_info}" if error_info else ""}
 
 ---
 *Lucy 2.0 Multi-Agent System - Powered by CrewAI*

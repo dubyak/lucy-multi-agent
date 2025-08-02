@@ -1,4 +1,5 @@
-streamlit>=1.28.0
 crewai
 python-dotenv
 langfuse
+openai>=1.0.0
+tiktoken
