@@ -273,8 +273,9 @@ async def run_demo():
 if __name__ == "__main__":
     import uvicorn
     
+    # Railway provides PORT environment variable
     port = int(os.getenv("PORT", 8000))
-    host = os.getenv("HOST", "0.0.0.0")
+    host = "0.0.0.0"  # Must bind to 0.0.0.0 for Railway
     
     print(f"🚀 Starting Lucy AI LangChain Backend on {host}:{port}")
     print("📋 Available endpoints:")
@@ -284,4 +285,4 @@ if __name__ == "__main__":
     print("  GET /analytics - System analytics")
     print("  POST /demo - Run complete demo")
     
-    uvicorn.run(app, host=host, port=port)
+    uvicorn.run(app, host=host, port=port, log_level="info")
