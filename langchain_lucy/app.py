@@ -6,6 +6,8 @@ Provides REST API for seamless customer-facing chat experience
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import os
@@ -75,8 +77,19 @@ async def root():
             "Multi-agent backend",
             "Critical path: B1→B4→E4b→E6→L3→L5→OFFER",
             "Specialized agents: PhotoVerifier, BusinessCoach, Underwriter"
-        ]
+        ],
+        "endpoints": {
+            "chat": "/chat",
+            "demo": "/demo (POST)",
+            "frontend": "/app",
+            "docs": "/docs"
+        }
     }
+
+@app.get("/app")
+async def get_frontend():
+    """Serve the frontend application"""
+    return FileResponse("index.html", media_type="text/html")
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(message: ChatMessage):
