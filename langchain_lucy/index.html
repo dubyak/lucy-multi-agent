@@ -302,21 +302,58 @@
         // Initialize chat
         window.addEventListener('load', function() {
             if (isFirstMessage) {
-                simulateInitialMessage();
+                getInitialMessage();
                 isFirstMessage = false;
             }
         });
         
-        function simulateInitialMessage() {
-            setTimeout(() => {
-                addMessage('lucy', `Hi 👋 I'm Lucy - your business partner, powered by Tala!
+        async function getInitialMessage() {
+            try {
+                // Get Lucy's initial greeting from the API
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: "start",
+                        session_id: null,
+                        photos: null
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    sessionId = data.session_id;
+                    
+                    setTimeout(() => {
+                        addMessage('lucy', data.response);
+                    }, 1000);
+                } else {
+                    // Fallback greeting
+                    setTimeout(() => {
+                        addMessage('lucy', `Hi 👋 I'm Lucy - your business partner, powered by Tala!
 
 I help hardworking Kenyan entrepreneurs like you grow your business AND access smart credit. Over the next 2-3 days, I'll learn about your business, help you set clear goals, and understand how the right loan can accelerate your success.
 
 What I need: Real photos, honest answers, and your business dreams! What you'll get: Instant business tips, personalized coaching, and potentially a loan designed for you to scale.
 
 Ready to get started? Send me 2 photos of your business (inside and outside) and tell me your location! 📸📍`);
-            }, 1000);
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Failed to get initial message:', error);
+                // Fallback greeting
+                setTimeout(() => {
+                    addMessage('lucy', `Hi 👋 I'm Lucy - your business partner, powered by Tala!
+
+I help hardworking Kenyan entrepreneurs like you grow your business AND access smart credit. Over the next 2-3 days, I'll learn about your business, help you set clear goals, and understand how the right loan can accelerate your success.
+
+What I need: Real photos, honest answers, and your business dreams! What you'll get: Instant business tips, personalized coaching, and potentially a loan designed for you to scale.
+
+Ready to get started? Send me 2 photos of your business (inside and outside) and tell me your location! 📸📍`);
+                }, 1000);
+            }
         }
         
         function handleKeyPress(event) {
@@ -339,7 +376,7 @@ Ready to get started? Send me 2 photos of your business (inside and outside) and
             showTyping();
             
             try {
-                // Simulate API call to Lucy backend
+                // Call Lucy AI backend
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: {
@@ -347,7 +384,8 @@ Ready to get started? Send me 2 photos of your business (inside and outside) and
                     },
                     body: JSON.stringify({
                         message: message,
-                        session_id: sessionId
+                        session_id: sessionId,
+                        photos: null
                     })
                 });
                 
@@ -357,16 +395,20 @@ Ready to get started? Send me 2 photos of your business (inside and outside) and
                     
                     hideTyping();
                     addMessage('lucy', data.response);
+                    
+                    // Update UI with task progress
+                    console.log(`Current task: ${data.current_task}`);
+                    console.log(`Completed tasks: ${data.completed_tasks.join(', ')}`);
                 } else {
-                    // Fallback for demo
+                    const errorData = await response.json();
                     hideTyping();
-                    addDemoResponse(message);
+                    addMessage('lucy', `Sorry, I encountered an error: ${errorData.detail}`);
                 }
                 
             } catch (error) {
-                console.log('Using demo mode');
+                console.error('API Error:', error);
                 hideTyping();
-                addDemoResponse(message);
+                addMessage('lucy', 'Sorry, I\'m having trouble connecting right now. Please try again in a moment.');
             }
         }
         

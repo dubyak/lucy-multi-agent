@@ -37,9 +37,13 @@ app.add_middleware(
 lucy_ai = None
 try:
     api_key = os.getenv("OPENAI_API_KEY", "demo-key")
+    print(f"Initializing Lucy AI with API key: {'***' + api_key[-4:] if len(api_key) > 4 else 'demo-key'}")
     lucy_ai = LucyAI(api_key)
+    print("Lucy AI initialized successfully")
 except Exception as e:
     print(f"Warning: Lucy AI initialization failed: {e}")
+    # Initialize anyway for demo mode
+    lucy_ai = LucyAI("demo-key")
 
 # In-memory session storage (use Redis in production)
 sessions: Dict[str, LucyState] = {}
@@ -95,7 +99,10 @@ async def get_frontend():
 async def chat(message: ChatMessage):
     """Main chat endpoint - customer sends message, gets Lucy's response"""
     
+    print(f"Received chat message: {message.message[:50]}...")
+    
     if not lucy_ai:
+        print("Lucy AI system not available")
         raise HTTPException(status_code=503, detail="Lucy AI system not available")
     
     try:
@@ -103,12 +110,17 @@ async def chat(message: ChatMessage):
         session_id = message.session_id or str(uuid.uuid4())
         state = sessions.get(session_id)
         
+        print(f"Session ID: {session_id}, Existing state: {state is not None}")
+        
         # Chat with Lucy
         response, updated_state = lucy_ai.chat(
             message=message.message,
             photos=message.photos,
             state=state
         )
+        
+        print(f"Lucy response: {response[:100]}...")
+        print(f"Current task: {updated_state.current_task.value}")
         
         # Save updated state
         sessions[session_id] = updated_state
@@ -135,6 +147,9 @@ async def chat(message: ChatMessage):
         )
         
     except Exception as e:
+        print(f"Chat error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Chat processing error: {str(e)}")
 
 @app.get("/session/{session_id}", response_model=SessionInfo)
