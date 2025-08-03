@@ -190,6 +190,25 @@
             outline: none;
         }
         
+        .photo-btn {
+            background: #e16a2d;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        
+        .photo-btn:hover {
+            background: #d15515;
+        }
+        
         .send-btn {
             background: #4a90a4;
             color: white;
@@ -206,6 +225,21 @@
         
         .send-btn:hover {
             background: #357a87;
+        }
+        
+        .uploaded-photos {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        
+        .photo-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
         }
         
         /* Loading indicator */
@@ -290,6 +324,8 @@
         
         <!-- Input -->
         <div class="chat-input">
+            <input type="file" id="photoInput" accept="image/*" multiple style="display: none;" onchange="handlePhotoUpload()">
+            <button class="photo-btn" onclick="document.getElementById('photoInput').click()">📷</button>
             <input type="text" class="input-field" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
             <button class="send-btn" onclick="sendMessage()">➤</button>
         </div>
@@ -298,6 +334,7 @@
     <script>
         let sessionId = null;
         let isFirstMessage = true;
+        let uploadedPhotos = [];
         
         // Initialize chat
         window.addEventListener('load', function() {
@@ -385,7 +422,7 @@ Ready to get started? Send me 2 photos of your business (inside and outside) and
                     body: JSON.stringify({
                         message: message,
                         session_id: sessionId,
-                        photos: null
+                        photos: uploadedPhotos.length > 0 ? uploadedPhotos.map(p => p.name) : null
                     })
                 });
                 
@@ -395,6 +432,15 @@ Ready to get started? Send me 2 photos of your business (inside and outside) and
                     
                     hideTyping();
                     addMessage('lucy', data.response);
+                    
+                    // Clear uploaded photos after sending
+                    if (uploadedPhotos.length > 0) {
+                        uploadedPhotos = [];
+                        const photosContainer = document.querySelector('.uploaded-photos');
+                        if (photosContainer) {
+                            photosContainer.remove();
+                        }
+                    }
                     
                     // Update UI with task progress
                     console.log(`Current task: ${data.current_task}`);
@@ -506,6 +552,62 @@ Just send me the number or tell me more about your business! 😊`;
         
         function hideTyping() {
             document.getElementById('typingIndicator').style.display = 'none';
+        }
+        
+        function handlePhotoUpload() {
+            const fileInput = document.getElementById('photoInput');
+            const files = fileInput.files;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const base64 = e.target.result;
+                    uploadedPhotos.push({
+                        name: file.name,
+                        data: base64,
+                        size: file.size
+                    });
+                    
+                    // Show photo preview
+                    showPhotoPreview(base64, file.name);
+                    
+                    // If this is the first photo upload, auto-send
+                    if (uploadedPhotos.length === 1) {
+                        const input = document.getElementById('messageInput');
+                        if (!input.value.trim()) {
+                            input.value = "Here are my business photos";
+                        }
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // Clear the input
+            fileInput.value = '';
+        }
+        
+        function showPhotoPreview(base64, fileName) {
+            const messagesContainer = document.getElementById('chatMessages');
+            
+            // Create or find the uploaded photos container
+            let photosContainer = messagesContainer.querySelector('.uploaded-photos');
+            if (!photosContainer) {
+                photosContainer = document.createElement('div');
+                photosContainer.className = 'uploaded-photos';
+                messagesContainer.appendChild(photosContainer);
+            }
+            
+            // Add photo preview
+            const img = document.createElement('img');
+            img.src = base64;
+            img.className = 'photo-preview';
+            img.title = fileName;
+            photosContainer.appendChild(img);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
     </script>
 </body>

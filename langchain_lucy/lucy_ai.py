@@ -687,8 +687,10 @@ I'm your business partner whether you take a loan or not! What would be most hel
                 state.current_task = LucyTask.E6
         
         elif state.current_task == LucyTask.E6:
-            if any(word in message.lower() for word in ["challenge", "problem", "difficult", "struggle"]):
-                state.customer_data.challenge = message
+            # More flexible challenge detection
+            if (any(word in message.lower() for word in ["challenge", "problem", "difficult", "struggle", "need", "want", "lack", "require"]) 
+                or "loan" in message.lower() or len(message.split()) >= 2):
+                state.customer_data.challenge = message if len(message) > 10 else "Need capital for business growth"
                 state.complete_task(LucyTask.E6)
                 state.current_task = LucyTask.L3
         
@@ -738,19 +740,40 @@ I'm your business partner whether you take a loan or not! What would be most hel
         if not numbers:
             return {}
         
-        # Simple heuristic: first number is customers, second is sales
+        # Handle different patterns
+        message_lower = message.lower()
+        
+        # Pattern: "30 customers, 800 KES" or "30, 800"
         if len(numbers) >= 2:
+            # First number is likely customers, second is sales
+            customers = int(numbers[0])
+            sales = int(numbers[1])
+            
+            # If second number is very small, might be in thousands
+            if sales < 100 and sales > 0:
+                sales = sales * 1000  # Convert 8 to 8000
+                
             return {
-                'customers': int(numbers[0]),
-                'sales': int(numbers[1]),
-                'weekly_sales': int(numbers[1]) * 7 if len(numbers) >= 2 else 0
+                'customers': customers,
+                'sales': sales,
+                'weekly_sales': sales * 7
             }
         elif len(numbers) == 1:
-            # Assume it's sales amount
-            return {
-                'customers': 10,  # Default assumption
-                'sales': int(numbers[0])
-            }
+            # Single number - determine if it's customers or sales based on context
+            num = int(numbers[0])
+            if 'customer' in message_lower:
+                return {
+                    'customers': num,
+                    'sales': 0  # Will need to ask for sales
+                }
+            elif 'kes' in message_lower or 'shilling' in message_lower or num > 50:
+                # Likely sales amount
+                if num < 100:
+                    num = num * 1000  # Convert 8 to 8000
+                return {
+                    'customers': 20,  # Default assumption
+                    'sales': num
+                }
         return {}
     
     def _extract_loan_uses(self, message: str) -> List[str]:
@@ -762,12 +785,22 @@ I'm your business partner whether you take a loan or not! What would be most hel
             "expand": "Business expansion",
             "equipment": "Buy equipment",
             "rent": "Pay rent",
-            "supplies": "Buy supplies"
+            "supplies": "Buy supplies",
+            "meat": "Add new product lines",
+            "products": "Expand product range",
+            "grow": "Business growth",
+            "capital": "Working capital",
+            "money": "Working capital"
         }
         
+        message_lower = message.lower()
         for keyword, use in loan_keywords.items():
-            if keyword in message.lower():
+            if keyword in message_lower:
                 uses.append(use)
+        
+        # If no specific use found but it's a loan-related message
+        if not uses and ("loan" in message_lower or len(message) > 3):
+            uses = ["Business expansion and growth"]
         
         return uses if uses else ["General business needs"]
     
