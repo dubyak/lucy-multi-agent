@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucy - Your Business Partner | Tala</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f6fa;
+            height: 100vh;
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 300px;
+            background: #e8e9ed;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4a5568;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .logout-btn {
+            background: #e16a2d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .tips-link {
+            color: #3182ce;
+            text-decoration: underline;
+            font-size: 14px;
+        }
+        
+        /* Main Chat Area */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        
+        .chat-header {
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .lucy-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+        
+        .lucy-name {
+            font-size: 32px;
+            color: #4a90a4;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .lucy-tagline {
+            font-size: 18px;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+        
+        .lucy-description {
+            font-size: 16px;
+            color: #2d3748;
+            font-weight: 500;
+        }
+        
+        /* Chat Messages */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(100vh - 300px);
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .user-msg-avatar {
+            width: 40px;
+            height: 40px;
+            background: #4a5568;
+            border-radius: 50%;
+            margin-left: 15px;
+        }
+        
+        .lucy-msg-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            line-height: 1.5;
+        }
+        
+        .user .message-content {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+        
+        .lucy .message-content {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            color: #2d3748;
+        }
+        
+        /* Input Area */
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .send-btn {
+            background: #4a90a4;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        
+        .send-btn:hover {
+            background: #357a87;
+        }
+        
+        /* Loading indicator */
+        .typing {
+            display: none;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            margin-left: 15px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #718096;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        /* Tala branding */
+        .tala-brand {
+            margin-top: auto;
+            text-align: center;
+            color: #4a90a4;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="user-profile">
+            <div class="user-avatar"></div>
+            <div class="user-name">Demo User</div>
+        </div>
+        
+        <button class="logout-btn">Logout</button>
+        
+        <a href="#" class="tips-link">Lucy Tips & FAQs</a>
+        
+        <div class="tala-brand">TALA</div>
+    </div>
+    
+    <!-- Main Chat -->
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="lucy-avatar">L</div>
+            <div class="lucy-name">Lucy</div>
+            <div class="lucy-tagline">Your trusted loan officer and business partner</div>
+            <div class="lucy-description">Talk with Lucy about how she can help your biashara grow!</div>
+        </div>
+        
+        <!-- Messages -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- Initial Lucy message will be added here -->
+        </div>
+        
+        <!-- Typing indicator -->
+        <div class="typing" id="typingIndicator">
+            <div class="message-avatar lucy-msg-avatar">L</div>
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+        
+        <!-- Input -->
+        <div class="chat-input">
+            <input type="text" class="input-field" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = null;
+        let isFirstMessage = true;
+        
+        // Initialize chat
+        window.addEventListener('load', function() {
+            if (isFirstMessage) {
+                simulateInitialMessage();
+                isFirstMessage = false;
+            }
+        });
+        
+        function simulateInitialMessage() {
+            setTimeout(() => {
+                addMessage('lucy', `Hi 👋 I'm Lucy - your business partner, powered by Tala!
+
+I help hardworking Kenyan entrepreneurs like you grow your business AND access smart credit. Over the next 2-3 days, I'll learn about your business, help you set clear goals, and understand how the right loan can accelerate your success.
+
+What I need: Real photos, honest answers, and your business dreams! What you'll get: Instant business tips, personalized coaching, and potentially a loan designed for you to scale.
+
+Ready to get started? Send me 2 photos of your business (inside and outside) and tell me your location! 📸📍`);
+            }, 1000);
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show typing indicator
+            showTyping();
+            
+            try {
+                // Simulate API call to Lucy backend
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        session_id: sessionId
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    sessionId = data.session_id;
+                    
+                    hideTyping();
+                    addMessage('lucy', data.response);
+                } else {
+                    // Fallback for demo
+                    hideTyping();
+                    addDemoResponse(message);
+                }
+                
+            } catch (error) {
+                console.log('Using demo mode');
+                hideTyping();
+                addDemoResponse(message);
+            }
+        }
+        
+        function addDemoResponse(userMessage) {
+            const lowerMessage = userMessage.toLowerCase();
+            
+            let response = "";
+            
+            if (lowerMessage.includes('photo') || lowerMessage.includes('kawangware') || lowerMessage.includes('market')) {
+                response = `Great photos! I can see your business at ${userMessage} 📸
+
+**Photo Analysis:**
+✅ **Authenticity**: Photos verified as genuine business images
+✅ **Stock Density**: Medium - good variety of products visible
+✅ **Floor Area**: Small to medium typical micro-business setup  
+✅ **Business Assessment**: Active retail operation with regular turnover
+
+Based on what I see, this looks like a solid business! The location and setup suggest monthly income potential of 15,000-25,000 KES.
+
+Now, tell me more about your business - what type of products do you mainly sell? 🛍️`;
+            } else if (lowerMessage.includes('grocery') || lowerMessage.includes('shop') || lowerMessage.includes('kiosk')) {
+                response = `Perfect! Now I'd love to learn more about you and your business. 
+
+What kind of business do you run? And more importantly - what do you **love most** about it? 
+
+I find that the best business partnerships start with understanding what drives you as an entrepreneur! 💼✨`;
+            } else if (lowerMessage.includes('love') || lowerMessage.includes('community') || lowerMessage.includes('help')) {
+                response = `I love that! It's clear you're passionate about helping your community 🌟
+
+That passion is exactly what makes businesses succeed. Now, let's think about the future:
+
+What's your biggest **goal** for your business in the next 1-3 months? What would you love to achieve or improve? 
+
+This helps me understand how a loan could support your vision! 🎯`;
+            } else if (lowerMessage.includes('customers') && lowerMessage.includes('kes')) {
+                response = `Great! Let me do some quick math for you 🧮
+
+**My Analysis:**
+- Average per customer: ~120 KES
+- Estimated monthly gross: ~78,000 KES
+- That's solid business! You're serving good numbers daily.
+
+Now, what's the **biggest challenge or opportunity** you're facing right now?`;
+            } else if (lowerMessage.includes('1') || lowerMessage.includes('tip')) {
+                response = `Great choice! 🚀
+
+Here's a quick business tip to help increase your sales:
+
+**Tip:**
+Ask your regular customers what other products they wish you had in your shop. Sometimes, small requests (like a certain snack or mixer) can turn into big sales if you listen and act fast! 👂📝
+
+Would you like another tip, or do you want to try a different feature like tracking your daily sales (2) or planning for new products (3)? Just reply with the number or let me know!`;
+            } else {
+                response = `Thank you for sharing that! I'm here to help you grow your business. 
+
+Would you like:
+1️⃣ A quick business tip
+2️⃣ Help tracking your sales
+3️⃣ Advice on new products
+
+Just send me the number or tell me more about your business! 😊`;
+            }
+            
+            setTimeout(() => {
+                addMessage('lucy', response);
+            }, 1500);
+        }
+        
+        function addMessage(sender, text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            if (sender === 'lucy') {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar lucy-msg-avatar">L</div>
+                    <div class="message-content">${text.replace(/\n/g, '<br>')}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">${text}</div>
+                    <div class="user-msg-avatar"></div>
+                `;
+            }
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'flex';
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
