@@ -139,8 +139,18 @@ Be warm, professional, and use emojis appropriately."""),
     def analyze_photos(self, photos: List[str], location: str) -> str:
         """Analyze photos and return Lucy's response"""
         
+        # Only analyze if photos are actually provided
+        if not photos or len(photos) == 0:
+            return f"""Thanks for sharing your location: {location}! 📍
+
+I'd love to see your business to better understand your setup. Could you please share 2 photos of your shop:
+1️⃣ **Inside view** - showing your products/stock
+2️⃣ **Outside view** - showing your shop front
+
+This helps me assess your business and create the perfect loan offer for you! 📸"""
+        
         if not LANGCHAIN_AVAILABLE:
-            # Demo mode response
+            # Demo mode response - but only when photos are provided
             return f"""Great photos! I can see your business at {location} 📸
 
 **Photo Analysis:**
@@ -192,11 +202,40 @@ Be warm, encouraging, and use emojis appropriately."""),
             ("human", "{input}")
         ])
     
-    def build_rapport(self, customer_data: CustomerData, current_task: LucyTask) -> str:
+    def build_rapport(self, customer_data: CustomerData, current_task: LucyTask, user_message: str = "") -> str:
         """Handle relationship building tasks"""
         
+        # Handle direct questions about Lucy's role
+        message_lower = user_message.lower()
+        if any(phrase in message_lower for phrase in ["what is your job", "who are you", "what do you do"]):
+            return """I'm Lucy, your AI business partner and loan officer! 🤖
+
+My job is to:
+- Learn about your business and goals
+- Help you grow through coaching and tips
+- Structure the perfect loan offer for your needs
+
+I'm here to make getting business credit simple and personal. Now, let's focus on **your** business - what kind of business do you run? 💼"""
+        
+        # Handle questions about what business Lucy sees
+        if any(phrase in message_lower for phrase in ["what business", "what do you see", "see my business"]):
+            if not customer_data.photos:
+                return """I don't see any photos yet! 📸 
+
+Could you please share 2 photos of your business so I can better understand your setup:
+1️⃣ Inside view - showing your products/stock
+2️⃣ Outside view - showing your shop front
+
+Once I see your business, I can give you much better insights and loan recommendations! 🏪"""
+            else:
+                return f"""From your photos, I can see you have a business at {customer_data.location}. I'd love to learn more details from you directly!
+
+What type of business do you run? (grocery shop, restaurant, salon, etc.) 
+
+And what do you **love most** about running your business? 💫"""
+        
         if not LANGCHAIN_AVAILABLE:
-            # Demo mode responses
+            # Demo mode responses - but more contextual
             if current_task == LucyTask.E4A:
                 return """Perfect! Now I'd love to learn more about you and your business. 
 
@@ -205,7 +244,8 @@ What kind of business do you run? And more importantly - what do you **love most
 I find that the best business partnerships start with understanding what drives you as an entrepreneur! 💼✨"""
             
             elif current_task == LucyTask.E4B:
-                return f"""I love that! It's clear you're passionate about {customer_data.what_they_love} 🌟
+                passion = customer_data.what_they_love if customer_data.what_they_love else "your business"
+                return f"""I love that! It's clear you're passionate about {passion} 🌟
 
 That passion is exactly what makes businesses succeed. Now, let's think about the future:
 
@@ -524,7 +564,7 @@ Ready to get started? Send me 2 photos of your business (inside and outside) and
                 return self._get_photo_prompt()
         
         elif agent == "business_coach":
-            return self.business_coach.build_rapport(state.customer_data, state.current_task)
+            return self.business_coach.build_rapport(state.customer_data, state.current_task, message)
         
         elif agent == "underwriter":
             if state.current_task == LucyTask.B4:
@@ -658,11 +698,18 @@ I'm your business partner whether you take a loan or not! What would be most hel
         
         # Comprehensive state updates for seamless flow
         if state.current_task == LucyTask.B1:
-            if photos or "photo" in message.lower() or "image" in message.lower():
-                state.customer_data.photos = photos or ["photo_description"]
-                state.customer_data.location = self._extract_location(message)
-                state.complete_task(LucyTask.B1)
-                state.current_task = LucyTask.E4A
+            # Extract location from any message
+            if message and len(message.strip()) > 0:
+                potential_location = self._extract_location(message)
+                if potential_location:
+                    state.customer_data.location = potential_location
+            
+            # Only complete B1 if we have both photos AND location
+            if photos and len(photos) > 0:
+                state.customer_data.photos = photos
+                if state.customer_data.location:  # Only advance if we have location too
+                    state.complete_task(LucyTask.B1)
+                    state.current_task = LucyTask.E4A
         
         elif state.current_task == LucyTask.E4A:
             if any(word in message.lower() for word in ["business", "shop", "sell", "kiosk", "market"]):
@@ -717,11 +764,21 @@ I'm your business partner whether you take a loan or not! What would be most hel
     
     def _extract_location(self, message: str) -> str:
         """Extract location from customer message"""
-        # Simple extraction logic
-        for word in message.split():
-            if any(marker in word.lower() for marker in ["market", "lane", "street", "road"]):
-                return message
-        return message
+        # More flexible location detection
+        message_lower = message.lower()
+        
+        # Common location indicators
+        location_indicators = ["market", "lane", "street", "road", "avenue", "in", "at", "near", "area", "estate", "mall"]
+        
+        # If it contains location indicators, return the whole message
+        if any(indicator in message_lower for indicator in location_indicators):
+            return message.strip()
+        
+        # If it's a reasonably short message (likely a place name), accept it
+        if len(message.split()) <= 4 and len(message.strip()) > 2:
+            return message.strip()
+        
+        return ""
     
     def _extract_business_type(self, message: str) -> str:
         """Extract business type from message"""
